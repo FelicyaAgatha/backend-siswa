@@ -1,36 +1,161 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Backend API Siswa
 
-## Getting Started
+REST API pengelolaan data siswa menggunakan Next.js, TypeScript, dan MySQL. Backend ini digunakan untuk fitur data siswa pada aplikasi Flutter.
 
-First, run the development server:
+## Fitur
+
+- Menampilkan seluruh siswa.
+- Menampilkan detail siswa berdasarkan ID.
+- Menambahkan siswa.
+- Mengedit siswa.
+- Menghapus siswa.
+- Validasi data wajib, jenis kelamin, dan NIPD unik.
+
+## Teknologi
+
+- Next.js App Router
+- TypeScript
+- MySQL
+- mysql2
+- Postman
+
+## Cara Menjalankan
+
+### 1. Clone repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/FelicyaAgatha/backend-siswa.git
+cd backend-siswa
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependency
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm.cmd install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Siapkan database
 
-## Learn More
+Aktifkan MySQL melalui Laragon.
 
-To learn more about Next.js, take a look at the following resources:
+Buka HeidiSQL, lalu buka dan jalankan file:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+database/siswa.sql
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+File tersebut membuat database `db_toko` dan tabel `siswa` jika belum tersedia. File SQL hanya berisi struktur, sehingga data siswa perlu ditambahkan melalui POST.
 
-## Deploy on Vercel
+### 4. Atur koneksi database
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Salin `.env.example` menjadi `.env.local`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Sesuaikan isinya dengan konfigurasi MySQL masing-masing:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=db_toko
+```
+
+### 5. Jalankan server
+
+```bash
+npm.cmd run dev -- --port 3001
+```
+
+Alamat dasar API:
+
+```text
+http://localhost:3001
+```
+
+## Daftar Endpoint
+
+| Method | Endpoint | Fungsi |
+|---|---|---|
+| GET | /api/siswa | Menampilkan seluruh siswa |
+| GET | /api/siswa/{id} | Menampilkan detail siswa |
+| POST | /api/siswa | Menambahkan siswa |
+| PUT | /api/siswa/{id} | Mengedit siswa |
+| DELETE | /api/siswa/{id} | Menghapus siswa |
+
+Ganti `{id}` dengan ID siswa yang tersedia di database.
+
+Endpoint siswa saat ini menggunakan No Auth.
+
+## Contoh Body POST dan PUT
+
+Pada Postman, pilih Body → raw → JSON.
+
+```json
+{
+  "nipd": "24251001",
+  "nama_lengkap": "Siswa Percobaan",
+  "jenis_kelamin": "Perempuan",
+  "alamat": "Parungpanjang",
+  "kelas": "XII",
+  "jurusan": "Rekayasa Perangkat Lunak"
+}
+```
+
+Ketentuan:
+
+- Semua kolom pada contoh wajib diisi.
+- NIPD harus unik.
+- Jenis kelamin: `Laki-laki` atau `Perempuan`.
+- ID dibuat otomatis saat menambahkan siswa.
+- GET dan DELETE tidak memerlukan body.
+
+## Pengujian Postman
+
+Import file berikut melalui tombol Import pada Postman:
+
+```text
+postman/APISiswa.postman_collection.json
+```
+
+Jalankan server dan MySQL sebelum mengirim request.
+
+Urutan pengujian:
+
+1. POST untuk menambahkan siswa dengan NIPD baru.
+2. Catat ID dari response POST.
+3. GET seluruh siswa.
+4. GET berdasarkan ID tersebut.
+5. PUT menggunakan ID tersebut.
+6. DELETE menggunakan ID tersebut.
+7. GET kembali untuk memastikan data sudah dihapus.
+
+Sesuaikan ID pada URL request PUT dan DELETE dengan hasil POST. ID tidak selalu dimulai ulang setelah data dihapus.
+
+## Status Response
+
+| Status | Keterangan |
+|---|---|
+| 200 | Data berhasil diambil, diperbarui, atau dihapus |
+| 201 | Siswa berhasil ditambahkan |
+| 400 | Input tidak valid |
+| 404 | Siswa tidak ditemukan |
+| 409 | NIPD sudah digunakan |
+| 500 | Terjadi kesalahan pada server |
+
+## Koneksi dengan Flutter
+
+Gunakan alamat API sesuai perangkat:
+
+| Perangkat | Alamat dasar |
+|---|---|
+| Chrome di laptop server | http://localhost:3001 |
+| Android Emulator | http://10.0.2.2:3001 |
+| HP fisik | http://IP-LAPTOP:3001 |
+
+Untuk HP fisik, gunakan IP lokal laptop dan hubungkan kedua perangkat ke jaringan yang sama. Pastikan koneksi ke port 3001 diizinkan firewall.
+
+Repository frontend:
+
+https://github.com/FelicyaAgatha/FlutterEnd
+
+Backend ini khusus fitur siswa. Login pada aplikasi sebelumnya menggunakan backend Express terpisah di port 3000.
